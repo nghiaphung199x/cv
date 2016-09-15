@@ -26,11 +26,13 @@
 	if($pheduyet == 1)
 		$btnPheduyet = false;
 ?>
+<?php if($arrParam['t'] != 'quick'): ?>
 	<div class="gantt_cal_ltitle" style="cursor: pointer;"><span class="gantt_mark">&nbsp;</span>
 		<span class="gantt_time"><?php echo $title; ?></span>
 	</div>
 	<div class="toolbars">
 		<ul class="list clearfix">
+		    <li class="btn-save"><a href="javascript:;" onclick="edit_congviec();"><i class="fa fa-floppy-o"></i>Lưu</a></li>
 <?php if($btnPheduyet == true):?>		
 			<li class="btn-pheduyet"><a href="javascript:;" onclick="pheduyet();"><i class="fa fa-gavel"></i>Phê duyệt</a></li>
 <?php endif;?>
@@ -39,6 +41,8 @@
 			
 		</ul>
 	</div>
+<?php endif;?>
+
 	<div class="arrord_nav">
 		<ul class="list clearfix">
 			<li class="active" data-id="progress_manager"><span class="title" id="count_tiendo">Tiến độ (0)</span></li>

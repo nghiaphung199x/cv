@@ -297,7 +297,23 @@
 					</div>	
 				</div>
 				<div class="manage-table tabs" id="progress_manager">
-					<div class="control">
+					<div class="control clearfix">		
+						<div class="pull-right">
+							<div class="buttons-list">
+								<div class="pull-right-btn">
+								   <a href="javascript:;" id="new-person-btn" onclick="add_tiendo();" class="btn btn-primary btn-lg" title="Thêm mới tiến độ"><span class="">Thêm mới tiến độ</span></a>	
+								</div>
+							</div>				
+						</div>
+					</div>
+					<div class="panel-heading">
+						<h3 class="panel-title">
+							Lịch sử tiến độ
+							<span title="22 total suppliers" class="badge bg-primary tip-left">22</span>
+						</h3>
+					</div>
+<!-- 
+					<div class="control" style="display: none;">
 						<ul class="button-list clearfix">
 							<li><a href="javascript:;" onclick="add_tiendo();"><i class="fa fa-plus"></i> Thêm</a></li>
 							<li id="btn_edit_xuly" class="button" style="display: none;"><a href="javascript:;" onclick="xuly_tiendo();"><i class="fa fa-bug"></i> Xử lý</a></li>
@@ -305,18 +321,18 @@
 							<li id="btn_delete_progress" class="button" style="display: none;"><a href="javascript:;" onclick="delete_file();"><i class="fa fa-times"></i> Xóa</a></li>
 						</ul>
 					</div>
+ -->
+
 					<div class="panel-body nopadding table_holder table-responsive">
 						<table class="tablesorter table table-hover" id="sortable_table">
 							<thead>
 								<tr>
-									<th style="width: 50px;"><input type="checkbox"><label><span class="check_tatca"></span></label></th>
 									<th style="width: 20%;">Công việc</th>
 									<th style="width: 10%;">Tiến độ</th>
 									<th style="width: 15%;">Tình trạng</th>
 									<th style="width: 10%;">Ưu tiên</th>						
 									<th>Tài khoản</th>
 									<th style="width: 15%;">Ngày</th>
-									<th style="width: 10%;">Phê duyệt</th>
 								</tr>
 							</thead>
 							<tbody>

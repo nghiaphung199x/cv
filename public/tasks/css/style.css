@@ -12,8 +12,33 @@
 .gantt_cal_light input {
 	font-size: 14px;
 }
+
+.manage-table .panel-heading {
+    border: 1px solid #d7dce5;
+    border-bottom: 0;
+}
+.manage-table .panel-title {
+    font-weight: normal;
+    background: #f9f9f9;
+    background-color: #f9f9f9;
+    display: table;
+    width: 100%;
+}
+
+.manage-table .panel-title span {
+	background: #489ee7;
+	color: white;
+}
+
+.manage-table > .panel-heading h3 {
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    padding-top: 5px;
+    color: #555555;
+}
 #my-form {
-	width: 1000px;
+	width: 1358px;
 	border-radius: 0;
 	display: none;
 	top: 15px; left: 50%;  
@@ -36,6 +61,11 @@
 	text-decoration: none;
 }
 
+#my-form .manage-table a.btn {
+	background: #489ee7;
+	border: 0;
+}
+
 #my-form .manage-table table th {
 	text-align: center;
 	font-weight: bold;
@@ -43,6 +73,10 @@
 
 #my-form .manage-table table td.center {
 	text-align: center;
+}
+
+#my-form .manage-table table tr:last-child td {
+	border-bottom: 0;
 }
 
 #my-form .manage-table table td {
@@ -163,7 +197,7 @@ display: block;
 #my-form .gantt_cal_larea {
 	border: 0;
 	height: auto;
-	padding: 10px 0 15px;
+	padding: 10px 0 20px;
 }
 
 #my-form.detail .gantt_cal_larea {
@@ -271,8 +305,6 @@ display: block;
 #progress_manager .panel-body {
     padding-top: 0;
     border: 1px solid #d7dce5;
-    min-height: 300px;
-	max-height: 450px;
 }
 
 #file_manager {
@@ -297,7 +329,7 @@ display: block;
 }
 
 .manage-table .control {
-	padding: 4px 15px 10px 15px;
+	padding: 4px 15px 15px 15px;
 }
 
 .manage-table .control ul {
@@ -320,7 +352,7 @@ display: block;
 }
 
 #progress_manager .text-center, #file_manage .text-center {
-	margin-top: 7px;
+	margin-top: 10px;
 }
 
 .arrord_nav {
@@ -657,6 +689,7 @@ display: block;
     vertical-align: top;
     margin: 0;
     font-size: 14px;
+	color: black;
 }
 
 .frm-comment .wrap-comment .frm-checkbox {
@@ -736,7 +769,7 @@ display: block;
     background: #489ee7;
     font-size: 14px;
     display: inline-block;
-    padding: 10px 20px;
+    padding: 10px 20px !important;
     color: #fff!important;
     border: 0 none;
     float: right!important;

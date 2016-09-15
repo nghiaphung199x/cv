@@ -63,8 +63,6 @@
 <?php endif;?>
 
 		<div class="gantt_cal_larea" style="height: 450px; overflow: auto; padding-top: 0; padding-top: 5px;">
-			<input type="hidden" name="task_id" id="task_id" value="<?php echo $id; ?>" />
-			<input type="hidden" name="parent" id="parent" value="<?php echo $parent; ?>" />
 			<table width="100%" cellpadding="7" class="x-info" style="border:0">
 		        <tbody>
 		            <tr>
@@ -177,7 +175,6 @@
 		                     <i>Không có file đính kèm.</i>
 		                </td>
 		            </tr>
-
 		        </tbody>
 		    </table>
 <?php 
@@ -185,40 +182,21 @@
 ?>
 			<div id="comment_section">
 				<div class="title">Ý kiến thảo luận</div>
-				<form action="" method="POST" class="frm-comment fn-comment">
+				<form method="POST" id="task_comment" class="frm-comment fn-comment">
+					<input type="hidden" name="task_id" id="task_id" value="<?php echo $id; ?>" />
+					<input type="hidden" name="parent" id="parent" value="<?php echo $parent; ?>" />
 					<p class="avatar"><img class="fn-useravatar" src="http://data.ht/images/no-avatar.png"></p>
 					<div class="wrap-comment">
-						<textarea name="content" cols="30" rows="10"></textarea>
-						<p class="frm-checkbox disabled">
+						<textarea name="content" id="comment_content" cols="30" rows="10"></textarea>
+						<p class="frm-checkbox">
 							<span>Đính kèm</span>
-							<input type="hidden" name="id" value="ZW7O9BBI"><input type="hidden" name="type" value="song"></p>
-						<button name="btnSubmit" type="submit" class="button btn-dark-blue pull-right">Bình luận</button>
+						</p>
+						<input type="button" value="Bình luận" name="btnSubmit" id="btnComment" class="button btn-dark-blue pull-right" />
 					</div>
 				</form>
-				<ul id="commentList" class="list-comment">
-	 				 <li class="item-comment"> 
-	 					<a target="_blank" rel="nofollow" href="javascript:;" class="thumb-user" title="Cao Nam An"> 
-	 						<img class="fn-thumb" width="50" src="http://s120.avatar.zdn.vn/avatar_files/3/b/b/e/caonaman369_120_1.jpg" alt="Cao Nam An"> 
-	 					</a> 
-	 					<div class="post-comment"> 
-	 						<a target="_blank" rel="nofollow" class="fn-link" href="http://me.zing.vn/u/caonaman369" title="Cao Nam An">Cao Nam An</a> 
-	 						<p class="fn-content">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis</p> 
-	 						<span class="fn-time">5 tiếng trước</span> 
-	 					</div> 
-	 				 </li> 
-	 				 
-	 				 <li class="item-comment"> 
-	 					<a target="_blank" rel="nofollow" href="javascript:;" class="thumb-user" title="Cao Nam An"> 
-	 						<img class="fn-thumb" width="50" src="http://s120.avatar.zdn.vn/avatar_files/3/b/b/e/caonaman369_120_1.jpg" alt="Cao Nam An"> 
-	 					</a> 
-	 					<div class="post-comment"> 
-	 						<a target="_blank" rel="nofollow" class="fn-link" href="http://me.zing.vn/u/caonaman369" title="Cao Nam An">Cao Nam An</a> 
-	 						<p class="fn-content">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis</p> 
-	 						<span class="fn-time">5 tiếng trước</span> 
-	 					</div> 
-	 				 </li>  
-				</ul>
-				<div class="phantrang" data-total="1" data-page="1"><ul><li><a class="none fn-first fn-page" data-page="1" href="#comment">Đầu</a></li><li><a class="none fn-prev fn-page" data-page="1" href="#comment">&lt;</a></li><li><a class="fn-page1 fn-page active" data-page="1" href="#comment">1</a></li><li><a class="fn-page2 fn-page" data-page="2" href="#comment">2</a></li><li><a class="fn-page3 fn-page" data-page="3" href="#comment">3</a></li><li><a class="fn-page4 fn-page" data-page="4" href="#comment">4</a></li><li><a class="fn-page5 fn-page" data-page="5" href="#comment">5</a></li><li><a class="fn-next fn-page" data-page="5" href="#comment">&gt;</a></li><li><a class="fn-last fn-page" data-page="5" href="#comment">Cuối</a></li></ul></div>
+				<ul id="commentList" class="list-comment"></ul>
+				<div class="phantrang"></div>
+			
 			</div>
 <?php 
 	}
@@ -226,4 +204,6 @@
 
 		</div>
 <script type="text/javascript">
+var task_id = $('#task_id').val();
+load_comment(task_id, 1);
 </script>

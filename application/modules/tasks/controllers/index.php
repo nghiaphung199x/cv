@@ -438,11 +438,20 @@ class Index extends MY_Controller{	//Thong so phan trang
 			
 			$arrParam['pheduyet'] = 2;
 			if(in_array('update_project', $task_permission))
-				$arrParam['pheduyet'] = 1;
+				$arrParam['pheduyet'] = 3;
 			elseif(in_array($user_info['id'], $is_implement) && in_array('update_brand_task', $task_permission))
-				$arrParam['pheduyet'] = 1;
+				$arrParam['pheduyet'] = 3;
 			elseif(count($is_progress) == 0)
-				$arrParam['pheduyet'] = 1;
+				$arrParam['pheduyet'] = 3;
+			
+			
+			if($arrParam['pheduyet'] > 3) {
+				if($arrParam['progress'] == -1) {
+					$this->MTasks->saveItem($arrParam
+							, array('task'=>'update-tiendo'));
+				}
+			}
+			
 			
 			$this->load->model('MTaskProgress');
 			$arrParam['id'] = $this->MTaskProgress->saveItem($arrParam, array('task'=>'add'));
@@ -452,8 +461,10 @@ class Index extends MY_Controller{	//Thong so phan trang
 				$this->MTaskProgress->handling($arrParam);
 				
 				$respon = array('flag'=>'true', 'message'=>'Cập nhật thành công', 'reload'=>'true');
-			}else
+			}else {
 				$respon = array('flag'=>'true', 'message'=>'Cập nhật thành công');
+			}
+				
 			
 			echo json_encode($respon);
 		}else {
@@ -712,6 +723,53 @@ class Index extends MY_Controller{	//Thong so phan trang
 		}
 	}
 	
+	public function commentlist() {
+		$this->load->model('MTaskComment');
+		$post  = $this->input->post();
+		if(!empty($post)) {
+			$config['base_url'] = base_url() . 'tasks/index/commentlist';
+		    $config['total_rows'] = $this->MTaskComment->countItem($this->_data['arrParam'], array('task'=>'public-list'));
+			$config['per_page'] = $this->_paginator['per_page'];
+			$config['uri_segment'] = $this->_paginator['uri_segment'];
+			$config['use_page_numbers'] = TRUE;
+			
+			$this->load->library("pagination");
+			$this->pagination->initialize($config);
+			$this->pagination->createConfig('front-end');
+			
+			$pagination = $this->pagination->create_ajax();
+				
+			$this->_data['arrParam']['start'] = $this->uri->segment(4);
+			$items = $this->MTaskComment->listItem($this->_data['arrParam'], array('task'=>'public-list'));
+	
+			$result = array('items'=>$items, 'pagination'=>$pagination);
+			
+			echo json_encode($result);
+		}
+	}
+	
+	public function addcomment() {
+		$this->load->model('MTaskComment');
+		$post  	  = $this->input->post();
+		$arrParam = $this->_data['arrParam'];
+
+		if(!empty($post)) {
+			$this->form_validation->set_rules('content', 'Nội dung', 'required');
+			
+			if($this->form_validation->run($this) == FALSE){
+				$errors = $this->form_validation->error_array();
+				
+				$response = array('flag'=>'false', 'msg'=>current($errors));
+			}else {
+				$this->MTaskComment->saveItem($arrParam, array('task'=>'add'));
+				$response = array('flag'=>'true', 'msg'=>'Bình luận thành công', 'task_id'=>$arrParam['task_id']);
+				
+			}
+			
+			echo json_encode($response);
+		}
+	}
+	 
 // 	public function test() {
 // 		$arrParam['id'] = 2;
 // 		$this->load->model('MTaskProgress');

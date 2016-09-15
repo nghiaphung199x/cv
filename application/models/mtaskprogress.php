@@ -1,8 +1,9 @@
 <?php 
 class MTaskProgress extends CI_Model{
    
-	protected $_table = 'task_progress';
-	protected $_items = null;
+	protected $_table    = 'task_progress';
+	protected $_items    = null;
+	protected $_task_ids = null;
 	public function __construct(){
 		parent::__construct();
 		
@@ -24,7 +25,8 @@ class MTaskProgress extends CI_Model{
 		if($options['task'] == 'public-info') {
 			$this->db->select('p.*')
 					 ->from($this->_table . ' AS p')
-					 ->where('p.id',$arrParam['id']);
+					 ->where('p.id',$arrParam['id'])
+					 ->where('p.pheduyet IN (1, 3)');
 			
 			$query = $this->db->get();
 			$result = $query->row_array();
@@ -38,10 +40,18 @@ class MTaskProgress extends CI_Model{
 	public function countItem($arrParam = null, $options = null){
 		if($options['task'] == 'public-list'){
 			$ssFilter  = $arrParam['ssFilter'];
+			
+			$taskTable = $this->model_load_model('MTasks');
+			
+			$item = $taskTable->getItem(array('id'=>$arrParam['task_id']), array('task'=>'public-info', 'brand'=>'detail'));
+			
+			$task_ids = $taskTable->getIds(array('lft'=>$item['lft'], 'rgt'=>$item['rgt'], 'project_id'=>$item['project_id']));
+				
+			$this->_task_ids = $task_ids;
 
 			$this->db -> select('COUNT(p.id) AS totalItem')
 					  -> from($this->_table . ' AS p')
-					  -> where('p.task_id', $arrParam['task_id']);
+					  -> where('p.task_id IN ('.implode(', ', $this->_task_ids).')');
 			
 			$query = $this->db->get();
 			
@@ -107,23 +117,18 @@ class MTaskProgress extends CI_Model{
 	public function listItem($arrParam = null, $options = null){
 		if($options['task'] == 'public-list'){
 			$prioty_arr    = array('Rất cao', 'Cao', 'Trung bình', 'Thấp', 'Rất thấp');
-			
-			$taskTable = $this->model_load_model('MTasks');
-
-			$item = $taskTable->getItem(array('id'=>$arrParam['task_id']), array('task'=>'public-info', 'brand'=>'detail'));
-	
-			$task_ids = $taskTable->getIds(array('lft'=>$item['lft'], 'rgt'=>$item['rgt'], 'project_id'=>$item['project_id']));
 
 			$ssFilter  = $arrParam['ssFilter'];
 
 			$paginator = $arrParam['paginator'];
-			$this->db->select("DATE_FORMAT(p.modified, '%d/%m/%Y %H:%i:%s') as modified", FALSE);
-			$this->db -> select('p.id, p.created_by, p.trangthai, t.name as task_name,p.progress, p.pheduyet, p.note, u.user_name, p.prioty')
+			$this->db->select("DATE_FORMAT(p.created, '%d/%m/%Y %H:%i:%s') as created", FALSE);
+			$this->db -> select('p.id, p.created_by, p.trangthai, t.name as task_name,p.progress, p.pheduyet, p.key, u.user_name, p.prioty')
 					  -> from($this->_table . ' AS p')
 					  -> join('tasks as t', 't.id = p.task_id', 'left')
-					  -> join('users AS u', 'u.id = p.modified_by', 'left')
-					  -> where('p.task_id IN ('.implode(', ', $task_ids).')')
-					  -> order_by('p.modified', 'DESC');
+					  -> join('users AS u', 'u.id = p.created_by', 'left')
+					  -> where('p.task_id IN ('.implode(', ', $this->_task_ids).')')
+					  -> where('p.pheduyet IN (1, 3)')
+					  -> order_by('p.created', 'DESC');
 	
 			$page = (empty($arrParam['start'])) ? 1 : $arrParam['start'];
 			$this->db->limit($paginator['per_page'],($page - 1)*$paginator['per_page']);
@@ -138,81 +143,14 @@ class MTaskProgress extends CI_Model{
 			$this->db->flush_cache();
 	
 			if(!empty($result)) {
-				// quyền
-				$is_implement = $is_create_task_parent = $is_progress = array();
-				if(!empty($item['is_implement'])) {
-					foreach($item['is_implement'] as $val)
-						$is_implement[] = $val['user_id'];
-						
-					$is_implement = array_unique($is_implement);
-				}
-					
-				if(!empty($item['is_create_task'])) {
-					foreach($item['is_create_task'] as $key => $val){
-						$is_create_task[] = $val['user_id'];
-						$keyArr = explode('-', $key);
-						if($keyArr[0] != $item['id'])
-							$is_create_task_parent[] = $val['user_id'];
-					}
-						
-					$is_create_task_parent = array_unique($is_create_task_parent);
-				}
-					
-				if(!empty($item['is_progress'])) {
-					foreach($item['is_progress'] as $key => $val){
-						$is_progress[] = $val['user_id'];
-					}
-						
-					$is_progress 		= array_unique($is_progress);
-				}
 				// end quyền
 
-				// check toàn quyền trên nhánh
-				$flag = false;
-				
-				if(in_array('update_project', $this->_task_permission))
-					$flag = true;
-				elseif(in_array($this->_id_admin, $is_implement) && in_array('update_brand_task', $this->_task_permission))
-					$flag = true;
-				elseif(in_array($this->_id_admin, $is_create_task_parent) && $this->_id_admin == $val['created_by']) 
-					$flag = true;
-				
-				// check xem có phải là level cuối ko
-				
 				$trangthai_arr = array('-1'=>'_','0'=>'Chưa thực hiện', '1'=>'Đang thực hiện', '2'=>'Hoàn thành', '3'=>'Đóng/dừng', '4'=>'Không thực hiện');
 				foreach($result as &$val) {
-					$val['user_name'] = ($val['user_name'] == NULL) ? '_' : $val['user_name'];
 					$val['trangthai'] = $trangthai_arr[$val['trangthai']];
 					$val['progress'] = $val['progress'] * 100 . '%';
-					if($val['pheduyet'] == 2)
-						$val['pheduyet'] = '<i class="fa fa-clock-o" title="Pending"></i>';
-					elseif($val['pheduyet'] == 1)
-						$val['pheduyet'] = '<i class="fa fa-check" title="Phê duyệt"></i>';
-					elseif($val['pheduyet'] == 0)
-						$val['pheduyet'] = '<i class="fa fa-ban" title="Không phê duyệt"></i>';
-					else
-						$val['pheduyet'] = '_';
-					
-					$val['note'] = nl2br($val['note']);
-					if(!empty($val['reply'])) {
-						$reply = '<strong>'.$val['user_pheduyet_name'].'</strong>'.nl2br($val['reply']);
-						$val['note'] = $val['note'] . '<br />' . $reply;
-					}
-					
+	
 					$val['prioty'] = $prioty_arr[$val['prioty']];
-					
-					if($flag == true) { // có toàn quyền trên nhánh
-						$val['per_xuly'] = 0;
-						if($val['pheduyet'] == 0){
-							$val['per_xuly'] = 1;
-						}
-
-					}else {
-						$val['per_xuly']  = 0;
-
-						if(in_array($this->_id_admin, $is_progress) && $val['pheduyet'] == 0)
-							$val['per_xuly'] = 1;
-					}
 				}
 			}
 				

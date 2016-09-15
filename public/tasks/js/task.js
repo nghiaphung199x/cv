@@ -17,8 +17,7 @@
 				  $(this).parents('.table').find('td input[type="checkbox"]').prop('checked', true);
 			  }
 	    });
-		
-		
+
 		$('body').on('click','.manage-table tbody tr td.cb',function(){
 			 var checkbox = $(this).closest('tr').find('input[type="checkbox"]');
 			 var manage_tab = checkbox.closest('.manage-table');
@@ -62,7 +61,12 @@
 				load_list(keyword, page);
 			});
 		});
-
+		
+		// comment
+		$('body').on('click','#btnComment',function(){
+			 comment();
+			 return false; 
+	    });
 	});
 	
 	function load_task() {
@@ -418,7 +422,7 @@
 					
 					$('#my-form .btn-save').html('<a href="javascript:;" onclick="edit_congviec();"><i class="fa fa-floppy-o"></i>Lưu</a>');
 
-				    var frame_array = ['customer_list', 'xem_list', 'implement_list', 'create_task_list', 'pheduyet_task_list'];
+				    var frame_array = ['customer_list', 'xem_list', 'implement_list', 'create_task_list', 'pheduyet_task_list', 'progress_list'];
 				    $.each(frame_array, function( index, value ) {
 					   css_form(value);
 					   press(value);
@@ -835,23 +839,38 @@
 			}
 		}
 		
-		function load_pagination(pagination) {
+		function load_pagination(pagination, template) {
 			if(jQuery.type(pagination) == 'object') {
 				var string = new Array();
 				$.each( pagination, function( key, page ) {
-					if(key == 'prev')
-						string[string.length] = '<a href="javascript:;" data-page="'+page+'">&lt;</a>';
-					else if(key == 'next')
-						string[string.length] = '<a href="javascript:;" data-page="'+page+'">&gt;</a>';
-					else if(key == 'current')
-						string[string.length] = '<strong>'+page+'</strong>';
-					else 
-						string[string.length] = '<a href="javascript:;" data-page="'+page+'">'+page+'</a>';
+					if(template == 'comment') {
+						if(key == 'prev')
+							string[string.length] = '<li><a class="none fn-prev fn-page" data-page="'+page+'" href="javascript:;">&lt;</a></li>';
+						else if(key == 'next')
+							string[string.length] = '<li><a class="fn-next fn-page" data-page="'+page+'" href="javascript:;">&gt;</a></li>';
+						else if(key == 'current')
+							string[string.length] = '<li><a class="fn-page active" data-page="'+page+'" href="javascript:;">'+page+'</a></li>';
+						else 
+							string[string.length] = '<li><a class="fn-page" data-page="'+page+'" href="javascript:;">'+page+'</a></li>';
+						
+					}else {
+						if(key == 'prev')
+							string[string.length] = '<a href="javascript:;" data-page="'+page+'">&lt;</a>';
+						else if(key == 'next')
+							string[string.length] = '<a href="javascript:;" data-page="'+page+'">&gt;</a>';
+						else if(key == 'current')
+							string[string.length] = '<strong>'+page+'</strong>';
+						else 
+							string[string.length] = '<a href="javascript:;" data-page="'+page+'">'+page+'</a>';
+					}
 				});
 				
 				string = string.join("");
 				
-				string = '<div class="text-center"><div class="pagination hidden-print alternate text-center">' + string + '</div></div>';
+				if(template == 'comment') {
+					string = '<ul>'+string+'</ul>';
+				}else
+					string = '<div class="text-center"><div class="pagination hidden-print alternate text-center">' + string + '</div></div>';
 
 				return string;
 			}else
@@ -896,7 +915,7 @@
 				  var id      	= value.id;
 				  var user_id 	= value.created_by;
 				  var user_name = value.user_name;
-				  var created 	= value.modified;
+				  var created 	= value.created;
 				  var progress  = value.progress;
 				  var trangthai = value.trangthai;
 				  var pheduyet 	= value.pheduyet;
@@ -904,28 +923,74 @@
 				  
 				  var prioty 	 = value.prioty;
 				  var task_name  = value.task_name;
-				  var per_xuly   = value.per_xuly;
 				  var task_name  = value.task_name;
 				  
-				  if(note != '')
-					  task_name = task_name + ' <a href="javascript:;"><i class="fa fa-pencil"></i></a>';
+//				  if(note != '')
+//					  task_name = task_name + ' <a href="javascript:;"><i class="fa fa-pencil"></i></a>';
 				  
 				  user_name = '<span style="font-weight: bold">'+user_name+'</span>';
-				  string[string.length] = '<tr style="cursor: pointer;">'
-												+'<td class="center cb"><input class="progress_checkbox" type="checkbox" id="item_'+id+'" value="'+id+'" data-xuly="'+per_xuly+'" /><label><span></span></label></td>'
+				  string[string.length] = '<tr style="cursor: pointer;">'		
 												+'<td class="cb">'+task_name+'</td>'
 												+'<td class="center cb">'+progress+'</td>'
 												+'<td class="center cb">'+trangthai+'</td>'
 												+'<td class="center cb">'+prioty+'</td>'
 												+'<td class="center cb">'+user_name+'</td>'
 												+'<td class="center cb">'+created+'</td>'
-												+'<td class="center cb">'+pheduyet+'</td>'
 											+'</tr>	';
 			 });
 			 
 			 string = string.join("");
 			 
 			 return string;
+		}
+		
+		function load_tempate_comment(items) {
+			 var string = new Array();
+			 $.each(items, function( index, value ) {
+				  var id      	= value.id;
+				  var username 	= value.username;
+				  var name 		= value.name;
+				  var content 	= value.content;
+				  var created 	= value.created;
+
+				  string[string.length] = 
+		 				  '<li class="item-comment">' 
+		 					+'<a target="_blank" rel="nofollow" href="javascript:;" class="thumb-user" title="'+name+'">' 
+		 						+'<img class="fn-thumb" width="50" src="http://s120.avatar.zdn.vn/avatar_files/3/b/b/e/caonaman369_120_1.jpg" alt="'+name+'">' 
+		 					+'</a>' 
+		 					+'<div class="post-comment">' 
+		 						+'<a target="_blank" rel="nofollow" class="fn-link" href="http://me.zing.vn/u/caonaman369" title="'+name+'">'+username+'</a>' 
+		 						+'<p class="fn-content">'+content+'</p>' 
+		 						+'<span class="fn-time">'+created+'</span>' 
+		 					+'</div>' 
+		 				 +'</li>' ; 
+
+			 });
+
+			 string = string.join("");	
+			 return string;
+		}
+		
+		function load_comment(task_id, page) {
+			var url = base_url + 'tasks/index/commentlist/'+page;
+			$.ajax({
+				type: "POST",
+				url: url,
+				data: {
+					task_id : task_id,
+				},
+				success: function(string){
+					var result = $.parseJSON(string);
+					var items = result.items;
+					if(items.length) {
+						var html_string = load_tempate_comment(items);
+						var pagination = load_pagination(pagination);
+						
+						$('#commentList').html(html_string);	
+						$('#commentList').html(html_string);	
+					}
+			    }
+			});
 		}
 
 		function load_list(keyword, page) {
@@ -974,5 +1039,22 @@
 					 }
 			    }
 			});
+		}
+		
+		function comment() {
+			var checkOptions = {
+					url : base_url + 'tasks/index/addcomment',
+			        dataType: "json",  
+			        success: commentData
+			    };
+		    $("#task_comment").ajaxSubmit(checkOptions); 
+		}
+		
+		function commentData(data) {
+			gantt.alert(data.msg);
+			if(data.flag == 'true') {
+				load_comment(data.task_id, 1);
+			}
+			$('#comment_content').val('');
 		}
 		
