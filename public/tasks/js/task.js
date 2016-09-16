@@ -40,7 +40,6 @@
 				 }else {
 					 $('#btn_edit_xuly').hide(); 
 				 }
-
 			 }
 			 
 	    });
@@ -999,12 +998,10 @@
 				var url	        = base_url + 'tasks/index/progresslist/'+page;
 				var manager_div = 'progress_manager';
 				var count_span  = 'count_tiendo';
-				var count_name  = 'Tiến độ';
 			}else if(keyword == 'file') {
 				var url 		  = base_url + 'tasks/index/filelist/'+page;
 				var manager_div   = 'file_manager';
 				var count_span 	  = 'count_tailieu';
-				var count_name 	  = 'Tài liệu';
 			}
 
 			$.ajax({
@@ -1035,7 +1032,7 @@
 						 else
 							 $('#'+manager_div).append(pagination);
 						 
-						 $('#'+count_span).text(count_name + ' ('+result.count+')');
+						 $('#'+count_span).text(result.count);
 					 }
 			    }
 			});

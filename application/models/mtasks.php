@@ -694,8 +694,9 @@ class MTasks extends MNested2{
 			$this->db->where("id",$arrParam['id']);
 
 			$data['trangthai']			= 		$arrParam['trangthai'];
-			$data['progress']			= 		$arrParam['progress'] / 100;
 			$data['prioty']				= 		$arrParam['prioty'];
+			if($arrParam['progress'] != -1) 
+				$data['progress']			= 		$arrParam['progress'] / 100;
 
 			$this->db->update($this->_table,$data);
 				

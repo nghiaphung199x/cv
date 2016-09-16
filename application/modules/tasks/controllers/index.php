@@ -403,6 +403,7 @@ class Index extends MY_Controller{	//Thong so phan trang
 	
 	public function addtiendo() {
 		$this->load->model('MTasks');
+		$this->load->model('MTaskProgress');
 		$post  = $this->input->post();
 		$arrParam = $this->_data['arrParam'];
 	
@@ -444,34 +445,34 @@ class Index extends MY_Controller{	//Thong so phan trang
 			elseif(count($is_progress) == 0)
 				$arrParam['pheduyet'] = 3;
 			
-			
-			if($arrParam['pheduyet'] > 3) {
+			if($arrParam['pheduyet'] == 3) { // không cần phải gửi request
+				// cập nhật tiến độ cho task
+				// nếu proress == -1 thì chỉ cập nhật trạng thái + progress, ngược lại handling
 				if($arrParam['progress'] == -1) {
-					$this->MTasks->saveItem($arrParam
-							, array('task'=>'update-tiendo'));
+					$this->MTasks->saveItem($arrParam, array('task'=>'update-tiendo'));
+					$arrParam['key'] = '';
+					$arrParam['date_pheduyet'] = @date("Y-m-d H:i:s");
+					
+					$this->MTaskProgress->saveItem($arrParam, array('task'=>'add'));
+				}else {
+					$this->MTaskProgress->handling($arrParam, array('task'=>'progress'));
 				}
-			}
-			
-			
-			$this->load->model('MTaskProgress');
-			$arrParam['id'] = $this->MTaskProgress->saveItem($arrParam, array('task'=>'add'));
-			
-			// nếu không cần phê duyệt
-			if($arrParam['pheduyet'] == 1 && $arrParam['progress'] != -1) {
-				$this->MTaskProgress->handling($arrParam);
 				
 				$respon = array('flag'=>'true', 'message'=>'Cập nhật thành công', 'reload'=>'true');
 			}else {
-				$respon = array('flag'=>'true', 'message'=>'Cập nhật thành công');
+				// cập nhật task progress. ko cập nhật task
+				$arrParam['key'] = '';
+				$arrParam['date_pheduyet'] = '0000-00-00 00:00:00';
+					
+				$this->MTaskProgress->saveItem($arrParam, array('task'=>'add'));
+				$respon = array('flag'=>'true', 'message'=>'Cập nhật tiến độ đang được phê duyệt.');
 			}
-				
-			
+
 			echo json_encode($respon);
 		}else {
 			$this->_data['item'] = $item = $this->MTasks->getItem(array('id'=>$this->_data['arrParam']['task_id']), array('task'=>'public-info'));
 			$this->load->view('index/addtiendo_view',$this->_data);
 		}
-		
 	}
 	
 	public function edittiendo() {

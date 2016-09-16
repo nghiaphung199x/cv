@@ -83,8 +83,8 @@
 		<div class="arrord_nav">
 			<ul class="list clearfix">
 				<li class="active" data-id="basic_manager"><span class="title">Cơ bản</span></li>
-				<li data-id="progress_manager"><span class="title" id="count_tiendo">Tiến độ (0)</span></li>
-				<li data-id="file_manager"><span class="title" id="count_tailieu">Tài liệu (0)</span></li>
+				<li data-id="progress_manager"><span class="title">Tiến độ</span></li>
+				<li data-id="file_manager"><span class="title">Tài liệu</span></li>
 			</ul>
 		</div>
 		
@@ -309,7 +309,7 @@
 					<div class="panel-heading">
 						<h3 class="panel-title">
 							Lịch sử tiến độ
-							<span title="22 total suppliers" class="badge bg-primary tip-left">22</span>
+							<span id="count_tiendo" title="22 total suppliers" class="badge bg-primary tip-left">0</span>
 						</h3>
 					</div>
 <!-- 

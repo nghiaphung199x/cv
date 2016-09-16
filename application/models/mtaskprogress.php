@@ -70,13 +70,14 @@ class MTaskProgress extends CI_Model{
 			$data['progress'] 			= $arrParam['progress'] / 100;
 			$data['pheduyet'] 			= $arrParam['pheduyet'];
 			$data['note']				= stripslashes($arrParam['note']);
-			$data['reply']				= '';
+			$data['reply']				= '';		
 			$data['created']			= @date("Y-m-d H:i:s");
 			$data['created_by']     	= $arrParam['adminInfo']['id'];
-			$data['modified']			= @date("Y-m-d H:i:s");
-			$data['modified_by']    	= $arrParam['adminInfo']['id'];
 			$data['user_pheduyet']		= 0;
+			$data['date_pheduyet']		= $arrParam['date_pheduyet'];
 			$data['user_pheduyet_name'] = '';
+		
+			$data['key']				= $arrParam['key'];
 			
 			$this->db->insert($this->_table,$data);
 			$lastId = $this->db->insert_id();
@@ -84,24 +85,6 @@ class MTaskProgress extends CI_Model{
 			$this->db->flush_cache();
 			
 			return $lastId;
-		}elseif($options['task'] == 'edit') {
-			$this->db->where("id",$arrParam['id']);
-			
-			if($arrParam['trangthai'] == 2 || $arrParam['progress'] == 100) {
-				$arrParam['trangthai'] = 2;
-				$arrParam['progress'] = 100;
-			}
-	
-			$data['trangthai'] 			= $arrParam['trangthai'];
-			$data['prioty'] 			= $arrParam['prioty'];
-			$data['progress'] 			= $arrParam['progress'] / 100;
-			$data['note']				= stripslashes($arrParam['note']);
-			$data['modified']			= @date("Y-m-d H:i:s");
-			$data['modified_by']    	= $arrParam['adminInfo']['id'];
-
-			$this->db->update($this->_table,$data);
-			
-			$this->db->flush_cache();
 		}elseif($options['task'] == 'update-pheduyet') {
 			$this->db->where("id",$arrParam['id']);
 			
@@ -121,14 +104,14 @@ class MTaskProgress extends CI_Model{
 			$ssFilter  = $arrParam['ssFilter'];
 
 			$paginator = $arrParam['paginator'];
-			$this->db->select("DATE_FORMAT(p.created, '%d/%m/%Y %H:%i:%s') as created", FALSE);
+			$this->db->select("DATE_FORMAT(p.date_pheduyet, '%d/%m/%Y %H:%i:%s') as created", FALSE);
 			$this->db -> select('p.id, p.created_by, p.trangthai, t.name as task_name,p.progress, p.pheduyet, p.key, u.user_name, p.prioty')
 					  -> from($this->_table . ' AS p')
 					  -> join('tasks as t', 't.id = p.task_id', 'left')
 					  -> join('users AS u', 'u.id = p.created_by', 'left')
 					  -> where('p.task_id IN ('.implode(', ', $this->_task_ids).')')
 					  -> where('p.pheduyet IN (1, 3)')
-					  -> order_by('p.created', 'DESC');
+					  -> order_by('p.date_pheduyet', 'DESC');
 	
 			$page = (empty($arrParam['start'])) ? 1 : $arrParam['start'];
 			$this->db->limit($paginator['per_page'],($page - 1)*$paginator['per_page']);
@@ -143,8 +126,6 @@ class MTaskProgress extends CI_Model{
 			$this->db->flush_cache();
 	
 			if(!empty($result)) {
-				// end quyền
-
 				$trangthai_arr = array('-1'=>'_','0'=>'Chưa thực hiện', '1'=>'Đang thực hiện', '2'=>'Hoàn thành', '3'=>'Đóng/dừng', '4'=>'Không thực hiện');
 				foreach($result as &$val) {
 					$val['trangthai'] = $trangthai_arr[$val['trangthai']];
@@ -198,10 +179,10 @@ class MTaskProgress extends CI_Model{
 						'reply' 			 => '',
 						'created'			 => @date("Y-m-d H:i:s"),
 						'created_by'		 => 0,
-						'modified'			 => @date("Y-m-d H:i:s"),
-						'modified_by'		 => 0,
 						'user_pheduyet'		 => 0,
 						'user_pheduyet_name' => '',	
+						'date_pheduyet'	     => @date("Y-m-d H:i:s"),
+						'key' 			 	 => '',
 						);
 				
 				$this->_items[] = $progressTmp;
@@ -211,8 +192,11 @@ class MTaskProgress extends CI_Model{
 		}
 	}
 	
-	function handling($arrParam) {
-		$progress_item = $this->getItem(array('id'=>$arrParam['id']), array('task'=>'public-info'));
+	function handling($arrParam = null, $options = null) {
+		if($options == null)
+			$progress_item = $this->getItem(array('id'=>$arrParam['id']), array('task'=>'public-info'));
+		elseif($options['task'] == 'progress')
+			$progress_item = $arrParam;
 		
 		$taskTable = $this->model_load_model('MTasks');
 		$task = $taskTable->getItem(array('id'=>$progress_item['task_id']), array('task'=>'public-info'));
@@ -234,7 +218,8 @@ class MTaskProgress extends CI_Model{
 		$this->do_progress($level);
 		
 		// cập nhật progress
-		$this->db->insert_batch($this->_table, $this->_items);
+		if($options['task'] == 'progress')
+			$this->db->insert_batch($this->_table, $this->_items);
 	}
 	
 	function model_load_model($model_name)
