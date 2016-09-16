@@ -38,14 +38,13 @@
 <?php endif;?>
 			<li class="btn-detail"><a href="javascript:;" onclick="detail();"><i class="fa fa-info"></i>Chi tiết</a></li>
 			<li class="btn-cancel"><a href="javascript:;" onclick="cancel('full');"><i class="fa fa-times-circle"></i>Đóng</a></li>
-			
 		</ul>
 	</div>
 <?php endif;?>
 
 	<div class="arrord_nav">
 		<ul class="list clearfix">
-			<li class="active" data-id="progress_manager"><span class="title" id="count_tiendo">Tiến độ (0)</span></li>
+			<li class="active" data-id="progress_manager"><span class="title">Tiến độ</span></li>
 		</ul>
 	</div>
 	<div class="gantt_cal_larea">
@@ -56,29 +55,78 @@
 			<input type="hidden" name="type" value="1" />
 
 			<div class="manage-table tabs" id="progress_manager" style="display: block;">
-				<div class="control">
-					<ul class="button-list clearfix">
-						<li><a href="javascript:;" onclick="add_tiendo();"><i class="fa fa-plus"></i> Thêm</a></li>
-						<li id="btn_edit_xuly" class="button" style="display: none;"><a href="javascript:;" onclick="edit_file();"><i class="fa fa-bug"></i> Xử lý</a></li>
-					</ul>
+				<div class="control clearfix">		
+					<div class="pull-right">
+						<div class="buttons-list">
+							<div class="pull-right-btn">
+							   <a href="javascript:;" id="new-person-btn" onclick="add_tiendo();" class="btn btn-primary btn-lg" title="Cập nhật tiến độ"><span class="">Cập nhật tiến độ</span></a>	
+							</div>
+						</div>				
+					</div>
 				</div>
-				<div class="panel-body nopadding table_holder table-responsive">
-					<table class="tablesorter table table-hover" id="sortable_table">
+				<div class="panel-heading">
+					<h3 class="panel-title">
+						<span class="tieude active" data-id="progress_list">Lịch sử tiến độ</span>
+						<span id="count_tiendo" title="22 total suppliers" class="badge bg-primary tip-left">0</span>
+						
+						<span class="tieude" style="margin-left: 10px;" data-id="request_list">Request</span>
+						<span id="count_request" title="22 total suppliers" class="badge bg-primary tip-left">0</span>
+						
+						<span class="tieude" style="margin-left: 10px;" data-id="pheduyet_list">Phê duyệt</span>
+						<span id="count_pheduyet" title="22 total suppliers" class="badge bg-primary tip-left">0</span>
+					</h3>
+				</div>
+				<div class="panel-body nopadding table_holder table-responsive table_list" id="progress_list">
+					<table class="tablesorter table table-hover sortable_table">
 						<thead>
 							<tr>
-								<th style="width: 50px;"><input type="checkbox"><label><span class="check_tatca"></span></label></th>
 								<th style="width: 20%;">Công việc</th>
 								<th style="width: 10%;">Tiến độ</th>
 								<th style="width: 15%;">Tình trạng</th>
 								<th style="width: 10%;">Ưu tiên</th>						
 								<th>Tài khoản</th>
 								<th style="width: 15%;">Ngày</th>
-								<th style="width: 10%;">Phê duyệt</th>
+							</tr>
+						</thead>
+						<tbody>	
+						</tbody>
+					</table>	
+				</div>
+				<div class="panel-body nopadding table_holder table-responsive table_list" id="request_list" style="display: none;">
+					<table class="tablesorter table table-hover sortable_table">
+						<thead>
+							<tr>
+								<th>Công việc</th>
+								<th style="width: 5%;">Tiến độ</th>
+								<th style="width: 10%;">Tình trạng</th>
+								<th style="width: 10%;">Ưu tiên</th>						
+								<th style="width: 15%;">Ngày gửi</th>
+								<th style="width: 10%;">Người phê duyệt</th>
+								<th style="width: 10%;">Ngày phê duyệt</th>
+								<th style="width: 10%;"></th>
 							</tr>
 						</thead>
 						<tbody>
 						</tbody>
 					</table>	
+				</div>
+				<div class="panel-body nopadding table_holder table-responsive table_list" id="pheduyet_list" style="display: none;">
+					<table class="tablesorter table table-hover sortable_table">
+						<thead>
+							<tr>
+								<th>Công việc</th>
+								<th style="width: 5%;">Tiến độ</th>
+								<th style="width: 10%;">Tình trạng</th>
+								<th style="width: 10%;">Ưu tiên</th>						
+								<th style="width: 10%;">Người gửi</th>
+								<th style="width: 10%;">Ngày gửi</th>
+								<th style="width: 10%;">Ngày phê duyệt</th>
+								<th style="width: 10%;"></th>
+							</tr>
+						</thead>
+						<tbody>
+						</tbody>	
+					</table>
 				</div>
 			</div>
 		</form>
@@ -86,6 +134,7 @@
 <script type="text/javascript">
 $( document ).ready(function() {
 	load_list('progress', 1);
+	countTiendo();
 	$('#add_navigation .title').click(function(e){
 		$('#add_navigation .active').parent().find('.content').slideUp();
 	    $('#add_navigation .active').removeClass('active');

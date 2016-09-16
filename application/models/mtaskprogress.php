@@ -1,9 +1,11 @@
 <?php 
 class MTaskProgress extends CI_Model{
    
-	protected $_table    = 'task_progress';
-	protected $_items    = null;
-	protected $_task_ids = null;
+	protected $_table       = 'task_progress';
+	protected $_items       = null;
+	protected $_task_ids    = null;
+	protected $_is_progress = null;
+	protected $_id_admin    = null;
 	public function __construct(){
 		parent::__construct();
 		
@@ -25,8 +27,7 @@ class MTaskProgress extends CI_Model{
 		if($options['task'] == 'public-info') {
 			$this->db->select('p.*')
 					 ->from($this->_table . ' AS p')
-					 ->where('p.id',$arrParam['id'])
-					 ->where('p.pheduyet IN (1, 3)');
+					 ->where('p.id',$arrParam['id']);
 			
 			$query = $this->db->get();
 			$result = $query->row_array();
@@ -38,26 +39,66 @@ class MTaskProgress extends CI_Model{
 	}
 	
 	public function countItem($arrParam = null, $options = null){
-		if($options['task'] == 'public-list'){
-			$ssFilter  = $arrParam['ssFilter'];
+		$ssFilter  = $arrParam['ssFilter'];
 			
-			$taskTable = $this->model_load_model('MTasks');
+		$taskTable = $this->model_load_model('MTasks');
 			
-			$item = $taskTable->getItem(array('id'=>$arrParam['task_id']), array('task'=>'public-info', 'brand'=>'detail'));
+		$item = $taskTable->getItem(array('id'=>$arrParam['task_id']), array('task'=>'public-info', 'brand'=>'detail'));
 			
-			$task_ids = $taskTable->getIds(array('lft'=>$item['lft'], 'rgt'=>$item['rgt'], 'project_id'=>$item['project_id']));
+		$task_ids = $taskTable->getIds(array('lft'=>$item['lft'], 'rgt'=>$item['rgt'], 'project_id'=>$item['project_id']));
+		
+		$this->_task_ids = $task_ids;
+		
+		// user có quyền phê duyệt
+		$is_progress  = array();
+		
+		if(!empty($item['is_progress'])) {
+			foreach($item['is_progress'] as $key => $val){
+				$is_progress[] = $val['user_id'];
+			}
 				
-			$this->_task_ids = $task_ids;
+			$is_progress 		= array_unique($is_progress);
+		}
+		
+		$this->_is_progress = $is_progress;
 
+		if($options['task'] == 'public-list'){
 			$this->db -> select('COUNT(p.id) AS totalItem')
 					  -> from($this->_table . ' AS p')
-					  -> where('p.task_id IN ('.implode(', ', $this->_task_ids).')');
+					  -> where('p.task_id IN ('.implode(', ', $this->_task_ids).')')
+					  -> where('p.pheduyet IN (1, 3)');
 			
 			$query = $this->db->get();
 			
 			$result = $query->row()->totalItem;
 			
 			$this->db->flush_cache();
+		}elseif($options['task'] == 'request-list') {
+			$this->db -> select('COUNT(p.id) AS totalItem')
+					  -> from($this->_table . ' AS p')
+					  -> where('p.task_id IN ('.implode(', ', $this->_task_ids).')')
+					  -> where('p.pheduyet IN (0, 1, 2)')
+					  -> where('p.created_by', $this->_id_admin);
+
+			$query = $this->db->get();
+			$result = $query->row()->totalItem;
+				
+			$this->db->flush_cache();
+		}elseif($options['task'] == 'pheduyet-list') {
+			if(in_array($this->_id_admin, $is_progress)) {
+				$this->db -> select('COUNT(p.id) AS totalItem')
+						  -> from($this->_table . ' AS p')
+						  -> where('p.task_id IN ('.implode(', ', $this->_task_ids).')')
+						  -> where('p.pheduyet IN (0, 1, 2)')
+						  -> where('p.created_by', $this->_id_admin);
+					
+				$query = $this->db->get();
+				$result = $query->row()->totalItem;
+				
+				$this->db->flush_cache();
+			}else
+				$result = 0;
+	
 		}
 		return $result;
 	}
@@ -98,10 +139,10 @@ class MTaskProgress extends CI_Model{
 	}
 	
 	public function listItem($arrParam = null, $options = null){
+		$prioty_arr    = array('Rất cao', 'Cao', 'Trung bình', 'Thấp', 'Rất thấp');
+		$ssFilter  = $arrParam['ssFilter'];
 		if($options['task'] == 'public-list'){
-			$prioty_arr    = array('Rất cao', 'Cao', 'Trung bình', 'Thấp', 'Rất thấp');
 
-			$ssFilter  = $arrParam['ssFilter'];
 
 			$paginator = $arrParam['paginator'];
 			$this->db->select("DATE_FORMAT(p.date_pheduyet, '%d/%m/%Y %H:%i:%s') as created", FALSE);
@@ -124,18 +165,53 @@ class MTaskProgress extends CI_Model{
 
 			$result = $query->result_array();
 			$this->db->flush_cache();
-	
+			
 			if(!empty($result)) {
 				$trangthai_arr = array('-1'=>'_','0'=>'Chưa thực hiện', '1'=>'Đang thực hiện', '2'=>'Hoàn thành', '3'=>'Đóng/dừng', '4'=>'Không thực hiện');
 				foreach($result as &$val) {
 					$val['trangthai'] = $trangthai_arr[$val['trangthai']];
 					$val['progress'] = $val['progress'] * 100 . '%';
-	
+						
 					$val['prioty'] = $prioty_arr[$val['prioty']];
 				}
 			}
-				
+		
+		}elseif($options['task'] == 'request-list') {
+			$paginator = $arrParam['paginator'];
+			$this->db->select("DATE_FORMAT(p.date_pheduyet, '%d/%m/%Y %H:%i:%s') as date_pheduyet", FALSE);
+			$this->db->select("DATE_FORMAT(p.created, '%d/%m/%Y %H:%i:%s') as created", FALSE);
+			$this->db -> select('p.id, p.created_by, p.trangthai, t.name as task_name,p.progress, p.pheduyet, p.key, p.prioty, p.user_pheduyet_name')
+					-> from($this->_table . ' AS p')
+					-> join('tasks as t', 't.id = p.task_id', 'left')
+					-> where('p.task_id IN ('.implode(', ', $this->_task_ids).')')
+					-> where('p.pheduyet IN (0, 1, 2)')
+					-> where('p.created_by', $this->_id_admin)
+					-> order_by('p.created', 'DESC');
+			
+			$page = (empty($arrParam['start'])) ? 1 : $arrParam['start'];
+			$this->db->limit($paginator['per_page'],($page - 1)*$paginator['per_page']);
+			
+			if(!empty($ssFilter['col']) && !empty($ssFilter['order'])){
+				$this->db->order_by($ssFilter['col'],$ssFilter['order']);
+			}
+			
+			$query = $this->db->get();
+			
+			$result = $query->result_array();
+			$this->db->flush_cache();
+			
+			if(!empty($result)) {
+				$trangthai_arr = array('-1'=>'_','0'=>'Chưa thực hiện', '1'=>'Đang thực hiện', '2'=>'Hoàn thành', '3'=>'Đóng/dừng', '4'=>'Không thực hiện');
+				foreach($result as &$val) {
+					$val['trangthai'] = $trangthai_arr[$val['trangthai']];
+					$val['progress'] = $val['progress'] * 100 . '%';
+			
+					$val['prioty'] = $prioty_arr[$val['prioty']];
+					$val['date_pheduyet'] = ($val['date_pheduyet'] == '00/00/0000 00:00:00') ? '' : $val['date_pheduyet'];
+				}
+			}
 		}
+		
 		return $result;
 	}
 	

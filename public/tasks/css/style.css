@@ -16,6 +16,8 @@
 .manage-table .panel-heading {
     border: 1px solid #d7dce5;
     border-bottom: 0;
+	padding-top: 0;
+	padding-bottom: 0;
 }
 .manage-table .panel-title {
     font-weight: normal;
@@ -28,6 +30,22 @@
 .manage-table .panel-title span {
 	background: #489ee7;
 	color: white;
+}
+
+.manage-table .panel-title span.tieude {
+	background: white;
+    display: inline-block;
+    height: 37px;
+    line-height: 37px;
+    padding: 0 5px;
+	color: black;
+    margin-right: 5px;
+ 	cursor: pointer;
+}
+
+.manage-table .panel-title span.tieude.active {
+	background: orange;
+	color: black;
 }
 
 .manage-table > .panel-heading h3 {

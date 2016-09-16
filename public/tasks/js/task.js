@@ -66,6 +66,21 @@
 			 comment();
 			 return false; 
 	    });
+		
+		// progress
+		$('body').on('click','#progress_manager .panel-title span.tieude',function(){
+			$('#progress_manager .panel-title span.tieude').removeClass('active');
+			var content_id = $(this).attr('data-id');
+			$('#progress_manager .table_list').hide();
+			$('#'+content_id).show();
+			
+			$(this).addClass('active');
+			
+			if(content_id == 'progress_list') {
+				load_list('progress', 1);
+			}else if(content_id == 'request_list')
+				load_list('request', 1);
+		});
 	});
 	
 	function load_task() {
@@ -622,6 +637,23 @@
 			}
 		}
 		
+		function countTiendo() {
+			var task_id = $('#task_id').val();
+			var url = base_url + 'tasks/index/countTiendo';
+			$.ajax({
+				type: "POST",
+				url: url,
+				data: {
+					task_id : task_id
+				},
+				success: function(string){
+					var result = $.parseJSON(string);
+					$('#count_request').text(result.request_total);
+					$('#count_pheduyet').text(result.pheduyet_total);
+			    }
+			});
+		}
+		
 		function add_tiendo() {
 			var task_id = $('#task_id').val();
 			var url = base_url + 'tasks/index/addtiendo'
@@ -702,7 +734,7 @@
 				    callback:function(){}
 				});
 			}else {
-				gantt.alert("Cập nhật thành công.");
+				gantt.alert(data.message);
 				$('#quick-form').html('');
 				$('#quick-form').hide();
 
@@ -908,6 +940,37 @@
 			 return string;	
 		}
 		
+		function load_template_request(items) {
+			 var string = new Array();
+			 $.each(items, function( index, value ) {
+				  var id      				= value.id;
+				  var task_name      		= value.task_name;
+				  var progress      		= value.progress;
+				  var trangthai      		= value.trangthai;
+				  var prioty      			= value.prioty;
+				  var created      		    = value.created;
+				  var user_pheduyet_name    = value.user_pheduyet_name;
+				  var date_pheduyet      	= value.date_pheduyet;
+				  
+				  string[string.length] = '<tr>'
+												+'<td>'+task_name+'</td>'
+												+'<td class="center">'+progress+'</td>'
+												+'<td class="center">'+trangthai+'</td>'
+												+'<td class="center">'+prioty+'</td>'
+												+'<td class="center">'+created+'</td>'
+												+'<td class="center">'+user_pheduyet_name+'</td>'
+												+'<td class="center">'+date_pheduyet+'</td>'
+												+'<td class="center">'
+													+'<a href="javascript:;" onclick="note();">Ghi chú</a>'
+												+'</td>'
+											+'</tr>';
+			 });
+			 
+			 string = string.join("");
+			 
+			 return string;
+		}
+		
 		function load_template_progress(items) {
 			 var string = new Array();
 			 $.each(items, function( index, value ) {
@@ -996,12 +1059,16 @@
 			var task_id = $('#task_id').val();
 			if(keyword == 'progress') {
 				var url	        = base_url + 'tasks/index/progresslist/'+page;
-				var manager_div = 'progress_manager';
+				var manager_div = 'progress_list';
 				var count_span  = 'count_tiendo';
 			}else if(keyword == 'file') {
 				var url 		  = base_url + 'tasks/index/filelist/'+page;
 				var manager_div   = 'file_manager';
 				var count_span 	  = 'count_tailieu';
+			}else if(keyword == 'request') {
+				var url 		  = base_url + 'tasks/index/requestlist/'+page;
+				var manager_div   = 'request_list';
+				var count_span 	  = 'count_request';
 			}
 
 			$.ajax({
@@ -1023,6 +1090,9 @@
 
 						 }else if(keyword == 'file') {
 							 var html_string = load_template_file(items);
+							 var pagination = load_pagination(pagination);
+						 }else if(keyword == 'request') {
+							 var html_string = load_template_request(items);
 							 var pagination = load_pagination(pagination);
 						 }
 		

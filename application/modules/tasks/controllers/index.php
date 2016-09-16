@@ -500,6 +500,17 @@ class Index extends MY_Controller{	//Thong so phan trang
 		}
 	}
 	
+	public function countTiendo() {
+		$this->load->model('MTaskProgress');
+		$post  = $this->input->post();
+		if(!empty($post)) {
+			$result['request_total']  = $this->MTaskProgress->countItem($this->_data['arrParam'], array('task'=>'request-list'));
+			$result['pheduyet_total'] = $this->MTaskProgress->countItem($this->_data['arrParam'], array('task'=>'pheduyet-list'));
+			
+			echo json_encode($result);
+		}
+	}
+	
 	public function xulytiendo() {
 		$post  = $this->input->post();
 		if(!empty($post)) {
@@ -720,6 +731,31 @@ class Index extends MY_Controller{	//Thong so phan trang
 			
 			$result = array('count'=> $config['total_rows'], 'items'=>$items, 'pagination'=>$pagination);
 
+			echo json_encode($result);
+		}
+	}
+	
+	public function requestlist() {
+		$this->load->model('MTaskProgress');
+		$post  = $this->input->post();
+		if(!empty($post)) {
+			$config['base_url'] = base_url() . 'tasks/index/progresslist';
+			$config['total_rows'] = $this->MTaskProgress->countItem($this->_data['arrParam'], array('task'=>'request-list'));
+			$config['per_page'] = $this->_paginator['per_page'];
+			$config['uri_segment'] = $this->_paginator['uri_segment'];
+			$config['use_page_numbers'] = TRUE;
+	
+			$this->load->library("pagination");
+			$this->pagination->initialize($config);
+			$this->pagination->createConfig('front-end');
+	
+			$pagination = $this->pagination->create_ajax();
+				
+			$this->_data['arrParam']['start'] = $this->uri->segment(4);
+			$items = $this->MTaskProgress->listItem($this->_data['arrParam'], array('task'=>'request-list'));
+				
+			$result = array('count'=> $config['total_rows'], 'items'=>$items, 'pagination'=>$pagination);
+	
 			echo json_encode($result);
 		}
 	}
