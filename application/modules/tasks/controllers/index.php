@@ -504,8 +504,9 @@ class Index extends MY_Controller{	//Thong so phan trang
 		$this->load->model('MTaskProgress');
 		$post  = $this->input->post();
 		if(!empty($post)) {
-			$result['request_total']  = $this->MTaskProgress->countItem($this->_data['arrParam'], array('task'=>'request-list'));
-			$result['pheduyet_total'] = $this->MTaskProgress->countItem($this->_data['arrParam'], array('task'=>'pheduyet-list'));
+			$result['tiendo_total']    = $this->MTaskProgress->countItem($this->_data['arrParam'], array('task'=>'public-list'));
+			$result['request_total']   = $this->MTaskProgress->countItem($this->_data['arrParam'], array('task'=>'request-list'));
+			$result['pheduyet_total']  = $this->MTaskProgress->countItem($this->_data['arrParam'], array('task'=>'pheduyet-list'));
 			
 			echo json_encode($result);
 		}
@@ -516,12 +517,26 @@ class Index extends MY_Controller{	//Thong so phan trang
 		if(!empty($post)) {
 			$this->load->model('MTaskProgress');
 			$this->MTaskProgress->saveItem($this->_data['arrParam'], array('task'=>'update-pheduyet'));
-			$this->MTaskProgress->handling($this->_data['arrParam']);
+			$this->MTaskProgress->handling($this->_data['arrParam'], array('task'=>'progress'));
 			
-			$respon = array('flag'=>'true', 'message'=>'Cập nhật thành công', 'reload'=>'true');
+			if($post['pheduyet'] == 1)
+				$respon = array('flag'=>'true', 'message'=>'Cập nhật thành công', 'reload'=>'true');
+			else
+				$respon = array('flag'=>'true', 'message'=>'Cập nhật thành công');
+			
 			echo json_encode($respon);
 		}else 
 			$this->load->view('index/xulytiendo_view',$this->_data);
+	}
+	
+	public function note() {
+		$post  = $this->input->post();
+		if(!empty($post)) {
+			$this->load->model('MTaskProgress');
+			$item = $this->MTaskProgress->getItem($this->_data['arrParam'], array('task'=>'public-info'));
+			$this->_data['item'] = $item;
+			$this->load->view('index/note_view',$this->_data);
+		}
 	}
 	
 	public function addfile() {
@@ -754,6 +769,31 @@ class Index extends MY_Controller{	//Thong so phan trang
 			$this->_data['arrParam']['start'] = $this->uri->segment(4);
 			$items = $this->MTaskProgress->listItem($this->_data['arrParam'], array('task'=>'request-list'));
 				
+			$result = array('count'=> $config['total_rows'], 'items'=>$items, 'pagination'=>$pagination);
+	
+			echo json_encode($result);
+		}
+	}
+	
+	public function pheduyetlist() {
+		$this->load->model('MTaskProgress');
+		$post  = $this->input->post();
+		if(!empty($post)) {
+			$config['base_url'] = base_url() . 'tasks/index/pheduyetlist';
+			$config['total_rows'] = $this->MTaskProgress->countItem($this->_data['arrParam'], array('task'=>'pheduyet-list'));
+			$config['per_page'] = $this->_paginator['per_page'];
+			$config['uri_segment'] = $this->_paginator['uri_segment'];
+			$config['use_page_numbers'] = TRUE;
+	
+			$this->load->library("pagination");
+			$this->pagination->initialize($config);
+			$this->pagination->createConfig('front-end');
+	
+			$pagination = $this->pagination->create_ajax();
+	
+			$this->_data['arrParam']['start'] = $this->uri->segment(4);
+			$items = $this->MTaskProgress->listItem($this->_data['arrParam'], array('task'=>'pheduyet-list'));
+	
 			$result = array('count'=> $config['total_rows'], 'items'=>$items, 'pagination'=>$pagination);
 	
 			echo json_encode($result);

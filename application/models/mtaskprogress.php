@@ -89,8 +89,8 @@ class MTaskProgress extends CI_Model{
 				$this->db -> select('COUNT(p.id) AS totalItem')
 						  -> from($this->_table . ' AS p')
 						  -> where('p.task_id IN ('.implode(', ', $this->_task_ids).')')
-						  -> where('p.pheduyet IN (0, 1, 2)')
-						  -> where('p.created_by', $this->_id_admin);
+						  -> where('p.pheduyet = 2')
+						  -> or_where('p.pheduyet IN (0, 1) AND p.user_pheduyet = ' . $this->_id_admin);
 					
 				$query = $this->db->get();
 				$result = $query->row()->totalItem;
@@ -208,6 +208,50 @@ class MTaskProgress extends CI_Model{
 			
 					$val['prioty'] = $prioty_arr[$val['prioty']];
 					$val['date_pheduyet'] = ($val['date_pheduyet'] == '00/00/0000 00:00:00') ? '' : $val['date_pheduyet'];
+				}
+			}
+		}elseif($options['task'] == 'pheduyet-list') {
+			$result = array();
+			if(in_array($this->_id_admin, $this->_is_progress)) {
+				$this->db->select("DATE_FORMAT(p.date_pheduyet, '%d/%m/%Y %H:%i:%s') as date_pheduyet", FALSE);
+				$this->db->select("DATE_FORMAT(p.created, '%d/%m/%Y %H:%i:%s') as created", FALSE);
+				$this->db -> select('p.id,t.name as task_name, p.progress, p.trangthai, p.prioty, u.user_name, p.pheduyet')
+						  -> from($this->_table . ' AS p')
+						  -> join('tasks as t', 't.id = p.task_id', 'left')
+						  -> join('users AS u', 'u.id = p.created_by', 'left')
+						  -> where('p.task_id IN ('.implode(', ', $this->_task_ids).')')
+						  -> where('p.pheduyet = 2')
+						  -> or_where('p.pheduyet IN (0, 1) AND p.user_pheduyet = ' . $this->_id_admin);
+					
+				$query = $this->db->get();
+				$result = $query->result_array();
+			
+				$this->db->flush_cache();
+				
+				if(!empty($result)) {
+					foreach($result as &$val) {
+						$trangthai_arr = array('-1'=>'_','0'=>'Chưa thực hiện', '1'=>'Đang thực hiện', '2'=>'Hoàn thành', '3'=>'Đóng/dừng', '4'=>'Không thực hiện');
+						foreach($result as &$val) {
+							$val['trangthai'] = $trangthai_arr[$val['trangthai']];
+							$val['progress'] = $val['progress'] * 100 . '%';
+								
+							$val['prioty'] = $prioty_arr[$val['prioty']];
+							if($val['date_pheduyet'] == '00/00/0000 00:00:00') {
+								$val['date_pheduyet'] = '';
+								$val['is_xuly'] = true;
+							}else {
+								$val['is_xuly'] = false;
+							}
+
+							if($val['pheduyet'] == 2)
+								$val['pheduyet'] = '<i class="fa fa-clock-o" aria-hidden="true"></i>';
+							elseif($val['pheduyet'] == 0)
+								$val['pheduyet'] = '<i class="fa fa-times"></i>';
+							elseif($val['pheduyet'] == 1)
+								$val['pheduyet'] = '<i class="fa fa-check"></i>';
+
+						}
+					}
 				}
 			}
 		}

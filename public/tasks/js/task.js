@@ -72,14 +72,20 @@
 			$('#progress_manager .panel-title span.tieude').removeClass('active');
 			var content_id = $(this).attr('data-id');
 			$('#progress_manager .table_list').hide();
-			$('#'+content_id).show();
 			
+			console.log($('#'+content_id).html());
+			$('#'+content_id).css('display', 'block');
+				
 			$(this).addClass('active');
 			
-			if(content_id == 'progress_list') {
+			if(content_id == 'progress_danhsach') {
 				load_list('progress', 1);
 			}else if(content_id == 'request_list')
 				load_list('request', 1);
+			else if(content_id == 'pheduyet_list'){
+				load_list('pheduyet', 1);
+			}
+	
 		});
 	});
 	
@@ -648,6 +654,8 @@
 				},
 				success: function(string){
 					var result = $.parseJSON(string);
+					//console.log(result);
+					$('#count_tiendo').text(result.tiendo_total);
 					$('#count_request').text(result.request_total);
 					$('#count_pheduyet').text(result.pheduyet_total);
 			    }
@@ -690,15 +698,29 @@
 			});
 		}
 		
-		function xuly_tiendo() {
-			var checkbox = $(".progress_checkbox:checked");
-			var progress_id = checkbox.val();
+		function xuly_tiendo(id) {
 			var url = base_url + 'tasks/index/xulytiendo';
 			$.ajax({
 				type: "GET",
 				url: url,
 				data: {
-					id : progress_id
+					id : id
+				},
+				success: function(html){
+					  $('#quick-form').html(html);
+					  $('#quick-form').show();
+					  create_layer('quick');
+			    }
+			});
+		}
+		
+		function note(id) {
+			var url = base_url + 'tasks/index/note';
+			$.ajax({
+				type: "POST",
+				url: url,
+				data: {
+					id : id
 				},
 				success: function(html){
 					  $('#quick-form').html(html);
@@ -737,8 +759,16 @@
 				gantt.alert(data.message);
 				$('#quick-form').html('');
 				$('#quick-form').hide();
-
-				load_list('progress', 1);
+				
+				var content_id = $('#progress_manager span.tieude.active').attr('data-id');
+				if(content_id == 'progress_danhsach')
+					load_list('progress', 1);
+				else if(content_id == 'request_list')
+					load_list('request', 1);
+				else if(content_id == 'pheduyet_list')
+					load_list('pheduyet', 1);
+				
+				countTiendo();
 				if(data.reload == 'true')
 					load_task();
 				
@@ -961,7 +991,45 @@
 												+'<td class="center">'+user_pheduyet_name+'</td>'
 												+'<td class="center">'+date_pheduyet+'</td>'
 												+'<td class="center">'
-													+'<a href="javascript:;" onclick="note();">Ghi chú</a>'
+													+'<a href="javascript:;" onclick="note('+id+');">Ghi chú</a>'
+												+'</td>'
+											+'</tr>';
+			 });
+			 
+			 string = string.join("");
+			 
+			 return string;
+		}
+		
+		function load_template_pheduyet(items) {
+			 var string = new Array();
+			 $.each(items, function( index, value ) {
+				  var id      			= value.id;
+				  var date_pheduyet     = value.date_pheduyet;
+				  var created      		= value.created;
+				  var task_name      	= value.task_name;
+				  var progress          = value.progress;
+				  var trangthai      	= value.trangthai;
+				  var prioty    		= value.prioty;
+				  var user_name      	= value.user_name;
+				  var pheduyet      	= value.pheduyet;
+				  
+				  if(value.is_xuly == true)
+					  var control = '<a href="javascript:;" onclick="note('+id+');">Ghi chú</a> | <a href="javascript:;" onclick="xuly_tiendo('+id+');">Phê duyệt</a>';
+				  else
+					  var control = '<a href="javascript:;" onclick="note('+id+');">Ghi chú</a>';
+
+				  string[string.length] = '<tr>'
+												+'<td>'+task_name+'</td>'
+												+'<td class="center">'+progress+'</td>'
+												+'<td class="center">'+trangthai+'</td>'
+												+'<td class="center">'+prioty+'</td>'
+												+'<td class="center">'+user_name+'</td>'
+												+'<td class="center">'+created+'</td>'
+												+'<td class="center">'+pheduyet+'</td>'
+												+'<td class="center">'+date_pheduyet+'</td>'
+												+'<td class="center">'
+													+control
 												+'</td>'
 											+'</tr>';
 			 });
@@ -986,10 +1054,7 @@
 				  var prioty 	 = value.prioty;
 				  var task_name  = value.task_name;
 				  var task_name  = value.task_name;
-				  
-//				  if(note != '')
-//					  task_name = task_name + ' <a href="javascript:;"><i class="fa fa-pencil"></i></a>';
-				  
+				  	  
 				  user_name = '<span style="font-weight: bold">'+user_name+'</span>';
 				  string[string.length] = '<tr style="cursor: pointer;">'		
 												+'<td class="cb">'+task_name+'</td>'
@@ -1059,7 +1124,7 @@
 			var task_id = $('#task_id').val();
 			if(keyword == 'progress') {
 				var url	        = base_url + 'tasks/index/progresslist/'+page;
-				var manager_div = 'progress_list';
+				var manager_div = 'progress_danhsach';
 				var count_span  = 'count_tiendo';
 			}else if(keyword == 'file') {
 				var url 		  = base_url + 'tasks/index/filelist/'+page;
@@ -1069,6 +1134,10 @@
 				var url 		  = base_url + 'tasks/index/requestlist/'+page;
 				var manager_div   = 'request_list';
 				var count_span 	  = 'count_request';
+			}else if(keyword == 'pheduyet') {
+				var url 		  = base_url + 'tasks/index/pheduyetlist/'+page;
+				var manager_div   = 'pheduyet_list';
+				var count_span 	  = 'count_pheduyet';
 			}
 
 			$.ajax({
@@ -1079,8 +1148,7 @@
 				},
 				success: function(string){
 					 var result = $.parseJSON(string);
-
-					 var items = result.items;
+					 var items = result.items; 
 					 var pagination = result.pagination;
 
 					 if(items.length) {
@@ -1093,6 +1161,9 @@
 							 var pagination = load_pagination(pagination);
 						 }else if(keyword == 'request') {
 							 var html_string = load_template_request(items);
+							 var pagination = load_pagination(pagination);
+						 }else if(keyword == 'pheduyet') {
+							 var html_string = load_template_pheduyet(items);;
 							 var pagination = load_pagination(pagination);
 						 }
 		

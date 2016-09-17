@@ -308,23 +308,18 @@
 					</div>
 					<div class="panel-heading">
 						<h3 class="panel-title">
-							Lịch sử tiến độ
+							<span class="tieude active" data-id="progress_danhsach">Lịch sử tiến độ</span>
 							<span id="count_tiendo" title="22 total suppliers" class="badge bg-primary tip-left">0</span>
+							
+							<span class="tieude" style="margin-left: 10px;" data-id="request_list">Request</span>
+							<span id="count_request" title="22 total suppliers" class="badge bg-primary tip-left">0</span>
+							
+							<span class="tieude" style="margin-left: 10px;" data-id="pheduyet_list">Phê duyệt</span>
+							<span id="count_pheduyet" title="22 total suppliers" class="badge bg-primary tip-left">0</span>
 						</h3>
 					</div>
-<!-- 
-					<div class="control" style="display: none;">
-						<ul class="button-list clearfix">
-							<li><a href="javascript:;" onclick="add_tiendo();"><i class="fa fa-plus"></i> Thêm</a></li>
-							<li id="btn_edit_xuly" class="button" style="display: none;"><a href="javascript:;" onclick="xuly_tiendo();"><i class="fa fa-bug"></i> Xử lý</a></li>
-							<li id="btn_edit_progress" class="button" style="display: none;"><a href="javascript:;" onclick="edit_tiendo();"><i class="fa fa-pencil-square-o"></i> Sửa</a></li>
-							<li id="btn_delete_progress" class="button" style="display: none;"><a href="javascript:;" onclick="delete_file();"><i class="fa fa-times"></i> Xóa</a></li>
-						</ul>
-					</div>
- -->
-
-					<div class="panel-body nopadding table_holder table-responsive">
-						<table class="tablesorter table table-hover" id="sortable_table">
+					<div class="panel-body nopadding table_holder table-responsive table_list" id="progress_danhsach">
+						<table class="tablesorter table table-hover sortable_table">
 							<thead>
 								<tr>
 									<th style="width: 20%;">Công việc</th>
@@ -335,9 +330,46 @@
 									<th style="width: 15%;">Ngày</th>
 								</tr>
 							</thead>
+							<tbody>	
+							</tbody>
+						</table>	
+					</div>
+					<div class="panel-body nopadding table_holder table-responsive table_list" id="request_list" style="display: none;">
+						<table class="tablesorter table table-hover sortable_table">
+							<thead>
+								<tr>
+									<th>Công việc</th>
+									<th style="width: 5%;">Tiến độ</th>
+									<th style="width: 10%;">Tình trạng</th>
+									<th style="width: 10%;">Ưu tiên</th>						
+									<th style="width: 15%;">Ngày gửi</th>
+									<th style="width: 10%;">Người phê duyệt</th>
+									<th style="width: 10%;">Ngày phê duyệt</th>
+									<th style="width: 10%;"></th>
+								</tr>
+							</thead>
 							<tbody>
 							</tbody>
 						</table>	
+					</div>
+					<div class="panel-body nopadding table_holder table-responsive table_list" id="pheduyet_list" style="display: none;">
+						<table class="tablesorter table table-hover sortable_table">
+							<thead>
+								<tr>
+									<th>Công việc</th>
+									<th style="width: 5%;">Tiến độ</th>
+									<th style="width: 10%;">Tình trạng</th>
+									<th style="width: 10%;">Ưu tiên</th>						
+									<th style="width: 10%;">Người gửi</th>
+									<th style="width: 10%;">Ngày gửi</th>
+									<th style="width: 10%;">Phê duyệt</th>
+									<th style="width: 10%;">Ngày phê duyệt</th>
+									<th style="width: 20%;"></th>
+								</tr>
+							</thead>
+							<tbody>
+							</tbody>	
+						</table>
 					</div>
 				</div>
 
@@ -374,6 +406,7 @@
 <script type="text/javascript">
 $( document ).ready(function() {
 	load_list('progress', 1);
+	countTiendo();
 	load_list('file', 1);
 	$('#add_navigation .title').click(function(e){
 		$('#add_navigation .active').parent().find('.content').slideUp();

@@ -66,7 +66,7 @@
 				</div>
 				<div class="panel-heading">
 					<h3 class="panel-title">
-						<span class="tieude active" data-id="progress_list">Lịch sử tiến độ</span>
+						<span class="tieude active" data-id="progress_danhsach">Lịch sử tiến độ</span>
 						<span id="count_tiendo" title="22 total suppliers" class="badge bg-primary tip-left">0</span>
 						
 						<span class="tieude" style="margin-left: 10px;" data-id="request_list">Request</span>
@@ -76,7 +76,7 @@
 						<span id="count_pheduyet" title="22 total suppliers" class="badge bg-primary tip-left">0</span>
 					</h3>
 				</div>
-				<div class="panel-body nopadding table_holder table-responsive table_list" id="progress_list">
+				<div class="panel-body nopadding table_holder table-responsive table_list" id="progress_danhsach">
 					<table class="tablesorter table table-hover sortable_table">
 						<thead>
 							<tr>
@@ -120,8 +120,9 @@
 								<th style="width: 10%;">Ưu tiên</th>						
 								<th style="width: 10%;">Người gửi</th>
 								<th style="width: 10%;">Ngày gửi</th>
-								<th style="width: 10%;">Ngày phê duyệt</th>
-								<th style="width: 10%;"></th>
+								<th style="width: 5%;">Phê duyệt</th>
+								<th style="width: 10%;">Phê duyệt</th>
+								<th style="width: 20%;"></th>
 							</tr>
 						</thead>
 						<tbody>
