@@ -1,4 +1,4 @@
 <?php
 function test() {
-	echo 'đến khỉ con cũng biết code 123';
+	echo 'ta là phùng hiếu nghĩa đẹp zai';
 }
