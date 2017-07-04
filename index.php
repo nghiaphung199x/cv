@@ -1,5 +1,5 @@
 <?php
 function test() {
-	echo 'khỉ nào biết code chứ';
+	echo 'phùng hiếu nghĩa';
 	echo 'ahihi';
 }
