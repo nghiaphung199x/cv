@@ -1,4 +1,5 @@
 <?php
 function test() {
-	echo 'đến khỉ con cũng biết code 123';
+	echo 'khỉ nào biết code chứ';
+	echo 'ahihi';
 }
