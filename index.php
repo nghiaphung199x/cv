@@ -1,5 +1,5 @@
 <?php
 function test() {
-	echo 'lại có 1 tí thay đổi rồi';
+	echo 'hình như lại thay đổi rồi';
 	echo 'ahihi';
 }
