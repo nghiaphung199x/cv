@@ -1,5 +1,5 @@
 <?php
 function test() {
-	echo 'phùng hiếu nghĩa 123';
+	echo 'lại có 1 tí thay đổi rồi';
 	echo 'ahihi';
 }
